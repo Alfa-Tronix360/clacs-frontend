@@ -1,4 +1,4 @@
-const API_BASE_URL = `http://localhost:8001`;
+const API_BASE_URL = `https://clacs-backend.onrender.com`;
 
 // Obter token de autenticação do localStorage
 function getAuthToken() {
