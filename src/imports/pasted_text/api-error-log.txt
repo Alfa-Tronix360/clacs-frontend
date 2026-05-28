@@ -1,0 +1,301 @@
+=== FRONTEND: Loading finalizado ===
+ 11:56:48 AM [vite] (client) hmr update /src/styles/index.css, /src/app/components/AuthInitializer.tsx, /src/app/pages/Login.tsx, /src/app/pages/admin/Clientes.tsx, /src/app/pages/admin/Contratos.tsx, /src/app/pages/admin/Tecnicos.tsx, /src/app/pages/admin/Dashboard.tsx, /src/app/pages/admin/Intervencoes.tsx, /src/app/pages/tecnico/Intervencoes.tsx, /src/app/pages/tecnico/Horas.tsx, /src/app/pages/tecnico/Dashboard.tsx, /src/app/pages/admin/Relatorios.tsx, /src/app/pages/cliente/Dashboard.tsx, /src/app/pages/cliente/Contratos.tsx, /src/app/pages/cliente/Intervencoes.tsx
+ [API] Rota pública: /auth/login - usando publicAnonKey
+ [API] Fazendo requisição para: https://jqzwrsqckpowrncrjkvv.supabase.co/functions/v1/make-server-1eb66b2f/auth/login
+ [API] Status da resposta: 200
+ [API] Dados da resposta: {success: true, data: {…}}
+ [API] Rota protegida: /stats/dashboard
+ [API] Token no localStorage: eyJhbGciOiJFUzI1NiIs...
+ [API] Usando: token do usuário
+ [API] Fazendo requisição para: https://jqzwrsqckpowrncrjkvv.supabase.co/functions/v1/make-server-1eb66b2f/stats/dashboard
+ [API] Rota protegida: /intervencoes
+ [API] Token no localStorage: eyJhbGciOiJFUzI1NiIs...
+ [API] Usando: token do usuário
+ [API] Fazendo requisição para: https://jqzwrsqckpowrncrjkvv.supabase.co/functions/v1/make-server-1eb66b2f/intervencoes
+ [API] Rota protegida: /contratos
+ [API] Token no localStorage: eyJhbGciOiJFUzI1NiIs...
+ [API] Usando: token do usuário
+ [API] Fazendo requisição para: https://jqzwrsqckpowrncrjkvv.supabase.co/functions/v1/make-server-1eb66b2f/contratos
+ [API] Rota protegida: /tecnicos
+ [API] Token no localStorage: eyJhbGciOiJFUzI1NiIs...
+ [API] Usando: token do usuário
+ [API] Fazendo requisição para: https://jqzwrsqckpowrncrjkvv.supabase.co/functions/v1/make-server-1eb66b2f/tecnicos
+  GET https://jqzwrsqckpowrncrjkvv.supabase.co/functions/v1/make-server-1eb66b2f/stats/dashboard 401 (Unauthorized)
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:40
+dashboard @ api.ts:298
+carregarDados @ Dashboard.tsx:30
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+ [API] Status da resposta: 401
+ [API] Dados da resposta: {code: 401, message: 'Invalid JWT'}
+ Erro na API (/stats/dashboard): {code: 401, message: 'Invalid JWT'}
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+r @ code_components_prev…113f44.min.js.br:69
+error @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:51
+await in fetchAPI
+dashboard @ api.ts:298
+carregarDados @ Dashboard.tsx:30
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+ Erro ao chamar API (/stats/dashboard): Error: Erro na requisição
+    at fetchAPI (api.ts:52:13)
+    at async Promise.all (1a7983b5-b25f-4a45-afdd-d5c931094487-v2-figmaiframepreview.figma.site/index 0)
+    at async carregarDados (Dashboard.tsx:29:70)
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+r @ code_components_prev…113f44.min.js.br:69
+error @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:57
+await in fetchAPI
+dashboard @ api.ts:298
+carregarDados @ Dashboard.tsx:30
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+ Erro ao carregar dados: Error: Erro na requisição
+    at fetchAPI (api.ts:52:13)
+    at async Promise.all (1a7983b5-b25f-4a45-afdd-d5c931094487-v2-figmaiframepreview.figma.site/index 0)
+    at async carregarDados (Dashboard.tsx:29:70)
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+r @ code_components_prev…113f44.min.js.br:69
+error @ code_components_prev…113f44.min.js.br:28
+carregarDados @ Dashboard.tsx:42
+await in carregarDados
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+  GET https://jqzwrsqckpowrncrjkvv.supabase.co/functions/v1/make-server-1eb66b2f/intervencoes 401 (Unauthorized)
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:40
+listar @ api.ts:184
+carregarDados @ Dashboard.tsx:31
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+ [API] Status da resposta: 401
+ [API] Dados da resposta: {code: 401, message: 'Invalid JWT'}
+ Erro na API (/intervencoes): {code: 401, message: 'Invalid JWT'}
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+r @ code_components_prev…113f44.min.js.br:69
+error @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:51
+await in fetchAPI
+listar @ api.ts:184
+carregarDados @ Dashboard.tsx:31
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+ Erro ao chamar API (/intervencoes): Error: Erro na requisição
+    at fetchAPI (api.ts:52:13)
+    at async Promise.all (1a7983b5-b25f-4a45-afdd-d5c931094487-v2-figmaiframepreview.figma.site/index 1)
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+r @ code_components_prev…113f44.min.js.br:69
+error @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:57
+await in fetchAPI
+listar @ api.ts:184
+carregarDados @ Dashboard.tsx:31
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+  GET https://jqzwrsqckpowrncrjkvv.supabase.co/functions/v1/make-server-1eb66b2f/tecnicos 401 (Unauthorized)
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:40
+listar @ api.ts:238
+carregarDados @ Dashboard.tsx:33
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+ [API] Status da resposta: 401
+ [API] Dados da resposta: {code: 401, message: 'Invalid JWT'}
+ Erro na API (/tecnicos): {code: 401, message: 'Invalid JWT'}
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+r @ code_components_prev…113f44.min.js.br:69
+error @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:51
+await in fetchAPI
+listar @ api.ts:238
+carregarDados @ Dashboard.tsx:33
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+ Erro ao chamar API (/tecnicos): Error: Erro na requisição
+    at fetchAPI (api.ts:52:13)
+    at async Promise.all (1a7983b5-b25f-4a45-afdd-d5c931094487-v2-figmaiframepreview.figma.site/index 3)
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+r @ code_components_prev…113f44.min.js.br:69
+error @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:57
+await in fetchAPI
+listar @ api.ts:238
+carregarDados @ Dashboard.tsx:33
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+  GET https://jqzwrsqckpowrncrjkvv.supabase.co/functions/v1/make-server-1eb66b2f/contratos 401 (Unauthorized)
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:40
+listar @ api.ts:149
+carregarDados @ Dashboard.tsx:32
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+ [API] Status da resposta: 401
+ [API] Dados da resposta: {code: 401, message: 'Invalid JWT'}
+ Erro na API (/contratos): {code: 401, message: 'Invalid JWT'}
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+r @ code_components_prev…113f44.min.js.br:69
+error @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:51
+await in fetchAPI
+listar @ api.ts:149
+carregarDados @ Dashboard.tsx:32
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
+ Erro ao chamar API (/contratos): Error: Erro na requisição
+    at fetchAPI (api.ts:52:13)
+    at async Promise.all (1a7983b5-b25f-4a45-afdd-d5c931094487-v2-figmaiframepreview.figma.site/index 2)
+(anonymous) @ code_components_prev…113f44.min.js.br:28
+r @ code_components_prev…113f44.min.js.br:69
+error @ code_components_prev…113f44.min.js.br:28
+fetchAPI @ api.ts:57
+await in fetchAPI
+listar @ api.ts:149
+carregarDados @ Dashboard.tsx:32
+(anonymous) @ Dashboard.tsx:22
+TN @ code_components_prev…113f44.min.js.br:89
+T7 @ code_components_prev…113f44.min.js.br:89
+T8 @ code_components_prev…113f44.min.js.br:89
+T6 @ code_components_prev…113f44.min.js.br:89
+T4 @ code_components_prev…113f44.min.js.br:89
+S1 @ code_components_prev…113f44.min.js.br:89
+SQ @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…113f44.min.js.br:89
+(anonymous) @ code_components_prev…5113f44.min.js.br:3
+V @ code_components_prev…13f44.min.js.br:113
+B @ code_components_prev…13f44.min.js.br:113
+eo @ code_components_prev…13f44.min.js.br:113Understand this error
