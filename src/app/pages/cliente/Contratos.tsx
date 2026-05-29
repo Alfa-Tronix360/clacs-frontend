@@ -59,7 +59,7 @@ export default function ClienteContratos() {
   };
 
   const handleExportarRelatorio = (contratoId: string) => {
-    window.open(`http://localhost:8001/relatorios/contrato/${contratoId}/cliente`, '_blank');
+    window.open(`https://clacs-backend.onrender.com/relatorios/contrato/${contratoId}/cliente`, '_blank');
   };
 
   if (loading) {
@@ -310,9 +310,9 @@ export default function ClienteContratos() {
                           </div>
                           <div className="flex items-center gap-3">
                             <span className={`text-xs px-2 py-1 rounded-full font-medium ${intervencao.status === "Concluído" ? "bg-green-100 text-green-700" :
-                                intervencao.status === "Em Andamento" ? "bg-blue-100 text-blue-700" :
-                                  intervencao.status === "Resolvido" ? "bg-purple-100 text-purple-700" :
-                                    "bg-gray-100 text-gray-700"
+                              intervencao.status === "Em Andamento" ? "bg-blue-100 text-blue-700" :
+                                intervencao.status === "Resolvido" ? "bg-purple-100 text-purple-700" :
+                                  "bg-gray-100 text-gray-700"
                               }`}>
                               {intervencao.status}
                             </span>
