@@ -170,7 +170,7 @@ export default function AdminIntervencoes() {
       alert('Erro: ID da intervenção não encontrado.');
       return;
     }
-    const url = `http://localhost:8001/relatorios/intervencao/${intervencaoId}/visualizar`;
+    const url = `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;
 
     setPdfUrl(url);
     setMostrarPDF(true);

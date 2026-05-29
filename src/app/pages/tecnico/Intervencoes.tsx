@@ -65,7 +65,7 @@ export default function TecnicoIntervencoes() {
   // ✅ Passa o nome do técnico e a data para o backend assinar o PDF
   const handleVisualizarPDF = (intervencaoId: string) => {
     const dataAgora = new Date().toLocaleString('pt-AO');
-    const url = `http://127.0.0.1:8001/relatorios/intervencao/${intervencaoId}/visualizar`;;
+    const url = `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;;
 
     window.open(url, '_blank');
   };
@@ -74,7 +74,7 @@ export default function TecnicoIntervencoes() {
     const dataAgora = new Date().toLocaleString('pt-AO');
 
     const url =
-      `http://127.0.0.1:8001/relatorios/intervencao/${intervencaoId}/download` +
+      `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/download` +
       `?tecnico=${encodeURIComponent(nomeTecnico)}` +
       `&data=${encodeURIComponent(dataAgora)}`;
 

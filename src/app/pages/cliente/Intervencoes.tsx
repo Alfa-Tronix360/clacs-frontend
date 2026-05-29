@@ -142,7 +142,7 @@ export default function ClienteIntervencoes() {
 
     // assinatura do técnico apenas
     const url =
-      `http://localhost:8001/relatorios/intervencao/${intervencaoId}/visualizar`;
+      `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;
 
     window.open(url, '_blank');
   };
@@ -157,7 +157,7 @@ export default function ClienteIntervencoes() {
     const dataAgora = new Date().toLocaleString('pt-AO');
 
     const url =
-      `http://localhost:8001/relatorios/intervencao/${intervencaoId}/download` +
+      `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/download` +
       `?cliente=${encodeURIComponent(nomeCliente)}` +
       `&data_cliente=${encodeURIComponent(dataAgora)}`;
 
