@@ -1,12 +1,15 @@
 import { FileText, Plus, AlertCircle, TrendingUp, Clock, Loader, X, Calendar, DollarSign } from "lucide-react";
 import { useState, useEffect } from "react";
-import { contratosAPI, clientesAPI } from "../../services/api";
+import { contratosAPI, clientesAPI, intervencoesAPI } from "../../services/api";
+
+
 
 export default function AdminContratos() {
   const [contratos, setContratos] = useState<any[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
+  const [contratoEditando, setContratoEditando] = useState<any>(null);
   const [formData, setFormData] = useState({
     clienteId: "",
     tipo: "Mensal",
@@ -42,6 +45,7 @@ export default function AdminContratos() {
   };
 
   const abrirModal = () => {
+    setContratoEditando(null);
     setFormData({
       clienteId: "",
       tipo: "Mensal",
@@ -55,37 +59,65 @@ export default function AdminContratos() {
 
   const fecharModal = () => {
     setModalAberto(false);
+    setContratoEditando(null);
   };
 
 
   const editarContrato = (contrato: any) => {
-    console.log("Editar:", contrato);
+    setContratoEditando(contrato);
+    setFormData({
+      clienteId: contrato.clienteId || contrato.cliente_id || "",
+      tipo: contrato.tipo || "Mensal",
+      horasContratadas: String(contrato.horasContratadas ?? contrato.horas_contratadas ?? ""),
+      valorMensal: String(contrato.valorMensal ?? contrato.valor_mensal ?? ""),
+      dataInicio: (contrato.dataInicio || contrato.data_inicio || "").split('T')[0] || new Date().toISOString().split('T')[0],
+      dataFim: (contrato.dataFim || contrato.data_fim || "").split('T')[0] || ""
+    });
+    setModalAberto(true);
   };
 
   const deletarContrato = async (id: number) => {
     const confirmar = window.confirm("Tem certeza que deseja eliminar este contrato?");
-
     if (!confirmar) return;
 
     try {
-      await contratosAPI.deletar(id.toString());
+      const response = await contratosAPI.deletar(id.toString());
 
-      setContratos(prev =>
-        prev.filter(c => c.id !== id)
-      );
+      if (!response.success) {
+        const erro = response.error || '';
 
+        if (erro.includes('intervenções associadas')) {
+          const contrato = contratos.find(c => c.id === id);
+          const clienteId = contrato?.clienteId || contrato?.cliente_id;
+
+          const confirmarTudo = confirm(
+            erro + '\n\nDeseja eliminar TODAS as intervenções deste cliente agora?'
+          );
+
+          if (confirmarTudo && clienteId) {
+            await intervencoesAPI.deletarPorCliente(clienteId);
+            const retry = await contratosAPI.deletar(id.toString());
+            if (retry.success) {
+              setContratos(prev => prev.filter(c => c.id !== id));
+              alert('Intervenções e contrato eliminados com sucesso!');
+            } else {
+              alert(retry.error || 'Erro ao eliminar contrato');
+            }
+          }
+          return;
+        }
+
+        alert(erro || 'Erro ao eliminar contrato');
+        return;
+      }
+
+      setContratos(prev => prev.filter(c => c.id !== id));
       alert("Contrato eliminado com sucesso!");
     } catch (error: any) {
       console.error("ERRO COMPLETO:", error);
-
-      alert(
-        error?.message ||
-        JSON.stringify(error) ||
-        "Erro ao eliminar contrato"
-      );
+      alert(error?.message || JSON.stringify(error) || "Erro ao eliminar contrato");
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -99,17 +131,19 @@ export default function AdminContratos() {
         dataFim: formData.dataFim || null
       };
 
-      const response = await contratosAPI.criar(contratoData);
+      const response = contratoEditando
+        ? await contratosAPI.atualizar(contratoEditando.id, contratoData)
+        : await contratosAPI.criar(contratoData);
 
       if (response.success) {
         // Recarregar todos os dados do servidor para garantir sincronização completa
         await carregarDados();
         fecharModal();
-        alert('Contrato criado com sucesso!');
+        alert(contratoEditando ? 'Contrato atualizado com sucesso!' : 'Contrato criado com sucesso!');
       }
     } catch (error: any) {
-      console.error('Erro ao criar contrato:', error);
-      alert(error.message || 'Erro ao criar contrato');
+      console.error('Erro ao salvar contrato:', error);
+      alert(error.message || 'Erro ao salvar contrato');
     }
   };
 
@@ -258,76 +292,6 @@ export default function AdminContratos() {
                         </div>
 
                       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
@@ -467,12 +431,12 @@ export default function AdminContratos() {
         </div>
       )}
 
-      {/* Modal de Criar Contrato */}
+      {/* Modal de Criar/Editar Contrato */}
       {modalAberto && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Novo Contrato</h2>
+              <h2 className="text-xl font-bold text-gray-900">{contratoEditando ? 'Editar Contrato' : 'Novo Contrato'}</h2>
               <button onClick={fecharModal} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
@@ -581,7 +545,7 @@ export default function AdminContratos() {
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                 >
-                  Criar Contrato
+                  {contratoEditando ? 'Salvar Alterações' : 'Criar Contrato'}
                 </button>
               </div>
             </form>

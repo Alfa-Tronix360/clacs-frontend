@@ -1,0 +1,16 @@
+# Dependências
+node_modules/
+
+# Ambiente local (não vai para o Git)
+.env
+.env.local
+
+# Ambiente de produção (vai para o Git — só tem URL público)
+# .env.production
+
+# Build
+dist/
+build/
+
+# Logs
+*.log

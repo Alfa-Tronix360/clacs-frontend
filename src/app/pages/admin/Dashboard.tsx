@@ -189,9 +189,9 @@ export default function AdminDashboard() {
               [...tecnicos].sort((a, b) => (b.horasMes || 0) - (a.horasMes || 0)).map((tecnico, index) => (
                 <div key={tecnico.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-yellow-400 text-white' :
-                      index === 1 ? 'bg-gray-300 text-gray-700' :
-                        index === 2 ? 'bg-orange-400 text-white' :
-                          'bg-gray-200 text-gray-600'
+                    index === 1 ? 'bg-gray-300 text-gray-700' :
+                      index === 2 ? 'bg-orange-400 text-white' :
+                        'bg-gray-200 text-gray-600'
                     }`}>
                     {index + 1}
                   </div>
@@ -221,8 +221,8 @@ export default function AdminDashboard() {
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">ID</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Título</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Cliente ID</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Técnico ID</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Cliente</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Técnico</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Prioridade</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
               </tr>
@@ -235,25 +235,25 @@ export default function AdminDashboard() {
                   </td>
                 </tr>
               ) : (
-                intervencoes.slice(0, 5).map(intervencao => (
+                intervencoes.slice(-5).reverse().map(intervencao => (
                   <tr key={intervencao.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 text-sm text-gray-600">{intervencao.numero}</td>
                     <td className="py-3 px-4 text-sm font-medium text-gray-900">{intervencao.titulo}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600">...{intervencao.clienteId?.slice(-4)}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{intervencao.tecnicoId ? `...${intervencao.tecnicoId.slice(-4)}` : '-'}</td>
+                    <td className="py-3 px-4 text-sm text-gray-600">{intervencao.clienteNome}</td>
+                    <td className="py-3 px-4 text-sm text-gray-600">{intervencao.tecnicoNome || '-'}</td>
                     <td className="py-3 px-4">
                       <span className={`text-xs px-2 py-1 rounded ${intervencao.prioridade === "Alta" ? "bg-red-100 text-red-700" :
-                          intervencao.prioridade === "Média" ? "bg-yellow-100 text-yellow-700" :
-                            "bg-green-100 text-green-700"
+                        intervencao.prioridade === "Média" ? "bg-yellow-100 text-yellow-700" :
+                          "bg-green-100 text-green-700"
                         }`}>
                         {intervencao.prioridade}
                       </span>
                     </td>
                     <td className="py-3 px-4">
                       <span className={`text-xs px-2 py-1 rounded ${intervencao.status === "Concluído" ? "bg-green-100 text-green-700" :
-                          intervencao.status === "Em Andamento" ? "bg-blue-100 text-blue-700" :
-                            intervencao.status === "Aguardando Cliente" ? "bg-yellow-100 text-yellow-700" :
-                              "bg-gray-100 text-gray-700"
+                        intervencao.status === "Em Andamento" ? "bg-blue-100 text-blue-700" :
+                          intervencao.status === "Aguardando Cliente" ? "bg-yellow-100 text-yellow-700" :
+                            "bg-gray-100 text-gray-700"
                         }`}>
                         {intervencao.status}
                       </span>

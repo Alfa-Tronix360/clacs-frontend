@@ -1,5 +1,7 @@
-const API_BASE_URL = `https://clacs-backend.onrender.com`;
-
+const API_BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:8001"
+    : "https://clacs-backend.onrender.com";
 // Obter token de autenticação do localStorage
 function getAuthToken() {
   return localStorage.getItem('access_token');
@@ -306,7 +308,22 @@ export const intervencoesAPI = {
       body: JSON.stringify(comentario),
     });
   },
+
+deletar: async (id: string) => {
+    return fetchAPI(`/intervencoes/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  deletarPorCliente: async (clienteId: string) => {
+  return fetchAPI(`/intervencoes/cliente/${clienteId}/todas`, {
+    method: 'DELETE',
+  });
+},
 };
+
+
+
 
 // ====================================
 // TÉCNICOS

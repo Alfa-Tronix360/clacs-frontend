@@ -142,7 +142,7 @@ export default function ClienteIntervencoes() {
 
     // assinatura do técnico apenas
     const url =
-      `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;
+      `http://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;
 
     window.open(url, '_blank');
   };
@@ -157,7 +157,7 @@ export default function ClienteIntervencoes() {
     const dataAgora = new Date().toLocaleString('pt-AO');
 
     const url =
-      `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/download` +
+      `http://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/download` +
       `?cliente=${encodeURIComponent(nomeCliente)}` +
       `&data_cliente=${encodeURIComponent(dataAgora)}`;
 
@@ -284,7 +284,7 @@ export default function ClienteIntervencoes() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500">Técnico:</span>
-                          <span className="font-medium text-gray-900">ID {intervencao.tecnicoId}</span>
+                          <span className="font-medium text-gray-900">ID {intervencao.tecnicoNome}</span>
                         </div>
                       </div>
                     </div>

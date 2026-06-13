@@ -65,7 +65,7 @@ export default function TecnicoIntervencoes() {
   // ✅ Passa o nome do técnico e a data para o backend assinar o PDF
   const handleVisualizarPDF = (intervencaoId: string) => {
     const dataAgora = new Date().toLocaleString('pt-AO');
-    const url = `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;;
+    const url = `http://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;;
 
     window.open(url, '_blank');
   };
@@ -74,7 +74,7 @@ export default function TecnicoIntervencoes() {
     const dataAgora = new Date().toLocaleString('pt-AO');
 
     const url =
-      `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/download` +
+      `http://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/download` +
       `?tecnico=${encodeURIComponent(nomeTecnico)}` +
       `&data=${encodeURIComponent(dataAgora)}`;
 
@@ -217,8 +217,8 @@ export default function TecnicoIntervencoes() {
 
                       <div className="flex flex-wrap gap-3 text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-500">Cliente ID:</span>
-                          <span className="font-medium text-gray-900">{maskId(intervencao.clienteId)}</span>
+                          <span className="text-gray-500">Cliente:</span>
+                          <span className="font-medium text-gray-900">{intervencao.clienteNome}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500">Categoria:</span>

@@ -165,12 +165,34 @@ export default function AdminIntervencoes() {
     }
   };
 
+  const handleEliminarIntervencao = async (intervencaoId: string) => {
+    if (!confirm('Tem certeza que deseja eliminar esta intervenção? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      const response = await intervencoesAPI.deletar(intervencaoId);
+      if (response.success) {
+        alert('Intervenção eliminada com sucesso!');
+        carregarDados();
+      } else {
+        alert('Erro ao eliminar intervenção: ' + (response.error || 'Erro desconhecido'));
+      }
+    } catch (error) {
+      console.error('Erro ao eliminar intervenção:', error);
+      alert('Erro ao eliminar intervenção');
+    }
+  };
+
+
+
+
   const handleDownloadPDF = (intervencaoId: string) => {
     if (!intervencaoId) {
       alert('Erro: ID da intervenção não encontrado.');
       return;
     }
-    const url = `https://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;
+    const url = `http://localhost:8001/relatorios/intervencao/${intervencaoId}/visualizar`;
 
     setPdfUrl(url);
     setMostrarPDF(true);
@@ -590,6 +612,16 @@ export default function AdminIntervencoes() {
                       <FileText className="w-4 h-4" />
                       Baixar PDF
                     </button>
+
+                    {/* Botão Eliminar - apenas para intervenções em Aberto */}
+                    {intervencao.status === "Aberto" && (
+                      <button
+                        onClick={() => handleEliminarIntervencao(intervencao.id)}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                        Eliminar
+                      </button>)}
 
                     {/* Botão Atribuir Técnico - apenas para estados não finais */}
                     {intervencao.status !== "Concluído" &&
