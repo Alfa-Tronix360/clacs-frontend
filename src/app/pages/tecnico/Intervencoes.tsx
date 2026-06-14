@@ -68,7 +68,7 @@ export default function TecnicoIntervencoes() {
   // ✅ Passa o nome do técnico e a data para o backend assinar o PDF
   const handleVisualizarPDF = (intervencaoId: string) => {
     const dataAgora = new Date().toLocaleString('pt-AO');
-    const url = `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`;;
+    const url = `${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`;;
 
     window.open(url, '_blank');
   };
@@ -77,7 +77,7 @@ export default function TecnicoIntervencoes() {
     const dataAgora = new Date().toLocaleString('pt-AO');
 
     const url =
-      `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/download` +
+      `${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/download` +
       `?tecnico=${encodeURIComponent(nomeTecnico)}` +
       `&data=${encodeURIComponent(dataAgora)}`;
 

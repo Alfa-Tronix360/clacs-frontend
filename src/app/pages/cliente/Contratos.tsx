@@ -63,7 +63,7 @@ export default function ClienteContratos() {
   };
 
   const handleExportarRelatorio = (contratoId: string) => {
-    window.open(`http://${API_BASE_URL}/relatorios/contrato/${contratoId}/cliente`, '_blank');
+    window.open(`${API_BASE_URL}/relatorios/contrato/${contratoId}/cliente`, '_blank');
   };
 
   if (loading) {

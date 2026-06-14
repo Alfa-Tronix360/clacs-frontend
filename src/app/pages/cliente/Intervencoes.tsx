@@ -145,7 +145,7 @@ export default function ClienteIntervencoes() {
 
     // assinatura do técnico apenas
     const url =
-      `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`;
+      `${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`;
 
     window.open(url, '_blank');
   };
@@ -160,7 +160,7 @@ export default function ClienteIntervencoes() {
     const dataAgora = new Date().toLocaleString('pt-AO');
 
     const url =
-      `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/download` +
+      `${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/download` +
       `?cliente=${encodeURIComponent(nomeCliente)}` +
       `&data_cliente=${encodeURIComponent(dataAgora)}`;
 

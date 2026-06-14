@@ -195,7 +195,7 @@ export default function AdminIntervencoes() {
       alert('Erro: ID da intervenção não encontrado.');
       return;
     }
-    const url = `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`;
+    const url = `${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`;
 
     setPdfUrl(url);
     setMostrarPDF(true);
