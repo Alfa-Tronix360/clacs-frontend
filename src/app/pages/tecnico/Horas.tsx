@@ -251,8 +251,8 @@ export default function TecnicoHoras() {
 
       {mensagem && (
         <div className={`px-4 py-3 rounded-lg text-sm font-medium ${mensagem.tipo === "sucesso"
-            ? "bg-green-50 border border-green-200 text-green-800"
-            : "bg-red-50 border border-red-200 text-red-800"
+          ? "bg-green-50 border border-green-200 text-green-800"
+          : "bg-red-50 border border-red-200 text-red-800"
           }`}>
           {mensagem.texto}
         </div>
@@ -335,8 +335,8 @@ export default function TecnicoHoras() {
               <button
                 onClick={toggleCronometro}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${cronometroAtivo
-                    ? "bg-red-600 hover:bg-red-700 text-white"
-                    : "bg-green-600 hover:bg-green-700 text-white"
+                  ? "bg-red-600 hover:bg-red-700 text-white"
+                  : "bg-green-600 hover:bg-green-700 text-white"
                   }`}
               >
                 {cronometroAtivo ? (
@@ -350,8 +350,8 @@ export default function TecnicoHoras() {
                 onClick={salvarTempo}
                 disabled={tempoTotalSegundos === 0}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${tempoTotalSegundos === 0
-                    ? "bg-gray-400 cursor-not-allowed text-white"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                  ? "bg-gray-400 cursor-not-allowed text-white"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
                   }`}
               >
                 <Save className="w-5 h-5" />
@@ -391,7 +391,7 @@ export default function TecnicoHoras() {
                       {new Date(registro.data).toLocaleDateString("pt-AO")}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-900">
-                      #{registro.intervencaoId}
+                      {intervencoes.find(i => i.id === registro.intervencaoId)?.numero || registro.intervencaoId}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600 font-mono">
                       {registro.horaInicio && registro.horaFim
