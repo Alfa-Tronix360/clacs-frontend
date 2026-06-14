@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { intervencoesAPI } from "../../services/api";
 import { maskId } from "../../services/MaskId";
+const API_BASE_URL = window.location.hostname === "localhost"
+  ? "http://localhost:8001"
+  : "https://clacs-backend.onrender.com";
 
 export default function TecnicoIntervencoes() {
   const navigate = useNavigate();
@@ -65,7 +68,7 @@ export default function TecnicoIntervencoes() {
   // ✅ Passa o nome do técnico e a data para o backend assinar o PDF
   const handleVisualizarPDF = (intervencaoId: string) => {
     const dataAgora = new Date().toLocaleString('pt-AO');
-    const url = `http://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;;
+    const url = `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`;;
 
     window.open(url, '_blank');
   };
@@ -74,7 +77,7 @@ export default function TecnicoIntervencoes() {
     const dataAgora = new Date().toLocaleString('pt-AO');
 
     const url =
-      `http://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/download` +
+      `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/download` +
       `?tecnico=${encodeURIComponent(nomeTecnico)}` +
       `&data=${encodeURIComponent(dataAgora)}`;
 

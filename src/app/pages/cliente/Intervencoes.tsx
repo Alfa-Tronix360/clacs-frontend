@@ -1,6 +1,9 @@
 import { Plus, Search, Star, MessageCircle, Upload, File, Image, X, Loader, CheckCircle, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 import { intervencoesAPI, clientesAPI, contratosAPI } from "../../services/api";
+const API_BASE_URL = window.location.hostname === "localhost"
+  ? "http://localhost:8001"
+  : "https://clacs-backend.onrender.com";
 
 export default function ClienteIntervencoes() {
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
@@ -142,7 +145,7 @@ export default function ClienteIntervencoes() {
 
     // assinatura do técnico apenas
     const url =
-      `http://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/visualizar`;
+      `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`;
 
     window.open(url, '_blank');
   };
@@ -157,7 +160,7 @@ export default function ClienteIntervencoes() {
     const dataAgora = new Date().toLocaleString('pt-AO');
 
     const url =
-      `http://clacs-backend.onrender.com/relatorios/intervencao/${intervencaoId}/download` +
+      `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/download` +
       `?cliente=${encodeURIComponent(nomeCliente)}` +
       `&data_cliente=${encodeURIComponent(dataAgora)}`;
 

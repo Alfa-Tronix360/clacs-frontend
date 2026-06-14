@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { intervencoesAPI, registrosHorasAPI, tecnicosAPI } from "../../services/api";
 import { maskId } from "../../services/MaskId";
 
+
 export default function TecnicoDashboard() {
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -199,13 +200,13 @@ export default function TecnicoDashboard() {
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <span>Cliente: {maskId(intervencao.clienteId)}</span>
                     <span className={`px-2 py-1 rounded text-xs ${intervencao.prioridade === "Alta" ? "bg-red-100 text-red-700" :
-                        intervencao.prioridade === "Média" ? "bg-yellow-100 text-yellow-700" :
-                          "bg-green-100 text-green-700"
+                      intervencao.prioridade === "Média" ? "bg-yellow-100 text-yellow-700" :
+                        "bg-green-100 text-green-700"
                       }`}>
                       {intervencao.prioridade}
                     </span>
                     <span className={`px-2 py-1 rounded text-xs ${intervencao.status === "Em Andamento" ? "bg-blue-100 text-blue-700" :
-                        "bg-gray-100 text-gray-700"
+                      "bg-gray-100 text-gray-700"
                       }`}>
                       {intervencao.status}
                     </span>

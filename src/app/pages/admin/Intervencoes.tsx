@@ -1,6 +1,9 @@
 import { Search, Plus, Filter, Upload, File, X, Loader, Edit, CheckCircle, FileText } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { intervencoesAPI, clientesAPI, tecnicosAPI } from "../../services/api";
+const API_BASE_URL = window.location.hostname === "localhost"
+  ? "http://localhost:8001"
+  : "https://clacs-backend.onrender.com";
 
 export default function AdminIntervencoes() {
   const [filtroStatus, setFiltroStatus] = useState("Todos");
@@ -192,7 +195,7 @@ export default function AdminIntervencoes() {
       alert('Erro: ID da intervenção não encontrado.');
       return;
     }
-    const url = `http://localhost:8001/relatorios/intervencao/${intervencaoId}/visualizar`;
+    const url = `http://${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`;
 
     setPdfUrl(url);
     setMostrarPDF(true);

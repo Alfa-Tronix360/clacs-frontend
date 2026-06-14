@@ -1,6 +1,10 @@
 import { FileText, Clock, Calendar, AlertCircle, Download, Loader, DollarSign } from "lucide-react";
 import { useState, useEffect } from "react";
 import { contratosAPI, intervencoesAPI, clientesAPI } from "../../services/api";
+const API_BASE_URL = window.location.hostname === "localhost"
+  ? "http://localhost:8001"
+  : "https://clacs-backend.onrender.com";
+
 
 export default function ClienteContratos() {
   const [contratos, setContratos] = useState<any[]>([]);
@@ -59,7 +63,7 @@ export default function ClienteContratos() {
   };
 
   const handleExportarRelatorio = (contratoId: string) => {
-    window.open(`http://clacs-backend.onrender.com/relatorios/contrato/${contratoId}/cliente`, '_blank');
+    window.open(`http://${API_BASE_URL}/relatorios/contrato/${contratoId}/cliente`, '_blank');
   };
 
   if (loading) {
