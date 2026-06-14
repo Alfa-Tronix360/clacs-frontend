@@ -391,7 +391,7 @@ export default function TecnicoHoras() {
                       {new Date(registro.data).toLocaleDateString("pt-AO")}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-900">
-                      {intervencoes.find(i => i.id === registro.intervencaoId)?.numero || registro.intervencaoId}
+                      #{registro.intervencaoId}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600 font-mono">
                       {registro.horaInicio && registro.horaFim
