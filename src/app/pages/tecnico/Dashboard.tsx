@@ -151,7 +151,7 @@ export default function TecnicoDashboard() {
                   <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{intervencao.titulo}</p>
-                    <p className="text-sm text-gray-600">Cliente: {maskId(intervencao.clienteId)}</p>
+                    <p className="text-sm text-gray-600">Cliente: {intervencao.clienteNome}</p>
                   </div>
                   <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">Alta</span>
                 </div>
@@ -198,7 +198,7 @@ export default function TecnicoDashboard() {
                     <h3 className="font-semibold text-gray-900">{intervencao.titulo}</h3>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span>Cliente: {maskId(intervencao.clienteId)}</span>
+                    <span>Cliente: {intervencao.clienteNome}</span>
                     <span className={`px-2 py-1 rounded text-xs ${intervencao.prioridade === "Alta" ? "bg-red-100 text-red-700" :
                       intervencao.prioridade === "Média" ? "bg-yellow-100 text-yellow-700" :
                         "bg-green-100 text-green-700"
