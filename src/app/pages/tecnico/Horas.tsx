@@ -43,7 +43,12 @@ export default function TecnicoHoras() {
   const [tecnicoId, setTecnicoId] = useState<string | null>(null);
   const [descricao, setDescricao] = useState("");
   const [intervId, setIntervId] = useState(lsGet(K.id));
-  const [cronAtivo, setCronAtivo] = useState(false);
+  const [cronAtivo, setCronAtivo] = useState(() => {
+    const id = localStorage.getItem("cron_id");
+    const paus = localStorage.getItem("cron_paus");
+    const ini = localStorage.getItem("cron_ini");
+    return !!id && paus !== "true" && !!ini;
+  });
   const [pausado, setPausado] = useState(lsGet(K.paus) === "true");
   const [iniciado, setIniciado] = useState(!!lsGet(K.id));
   const [tempo, setTempo] = useState(getTotal());
@@ -53,10 +58,17 @@ export default function TecnicoHoras() {
 
   // Inicia o intervalo do contador — não depende de estado React
   const startInterval = () => {
+
+
     if (ref.current) clearInterval(ref.current);
     ref.current = setInterval(() => setTempo(getTotal()), 1000);
   };
 
+  useEffect(() => {
+    if (cronAtivo) {
+      startInterval();
+    }
+  }, []);
   // Função principal de início — reutilizada pelo botão E pelo sessionStorage
   const iniciar = (id: string) => {
     const agora = Date.now();
