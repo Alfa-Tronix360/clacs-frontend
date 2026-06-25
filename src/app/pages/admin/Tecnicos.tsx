@@ -1,5 +1,5 @@
-import { Plus, Star, Clock, ClipboardList, TrendingUp, Loader, X, Link } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Plus, Star, Clock, ClipboardList, TrendingUp, Loader, X, Link, Edit, Trash2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { intervencoesAPI, tecnicosAPI } from "../../services/api";
 
 export default function AdminTecnicos() {
@@ -8,12 +8,20 @@ export default function AdminTecnicos() {
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
   const [modalVincularAberto, setModalVincularAberto] = useState(false);
+  const [modalEditarAberto, setModalEditarAberto] = useState(false);
   const [tecnicoSelecionado, setTecnicoSelecionado] = useState<any>(null);
+  const [tecnicoEditando, setTecnicoEditando] = useState<any>(null);
   const [userIdParaVincular, setUserIdParaVincular] = useState("");
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
     senha: "",
+    nivel: "Júnior",
+    especialidade: "Geral"
+  });
+  const [formEditar, setFormEditar] = useState({
+    nome: "",
+    email: "",
     nivel: "Júnior",
     especialidade: "Geral"
   });
@@ -30,12 +38,8 @@ export default function AdminTecnicos() {
         tecnicosAPI.listar()
       ]);
 
-      if (intervencoesRes.success) {
-        setIntervencoes(intervencoesRes.data);
-      }
-      if (tecnicosRes.success) {
-        setTecnicos(tecnicosRes.data);
-      }
+      if (intervencoesRes.success) setIntervencoes(intervencoesRes.data);
+      if (tecnicosRes.success) setTecnicos(tecnicosRes.data);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     } finally {
@@ -44,42 +48,59 @@ export default function AdminTecnicos() {
   };
 
   const abrirModal = () => {
-    setFormData({
-      nome: "",
-      email: "",
-      senha: "",
-      nivel: "Júnior",
-      especialidade: "Geral"
-    });
+    setFormData({ nome: "", email: "", senha: "", nivel: "Júnior", especialidade: "Geral" });
     setModalAberto(true);
   };
 
   const fecharModal = () => {
     setModalAberto(false);
-    setFormData({
-      nome: "",
-      email: "",
-      senha: "",
-      nivel: "Júnior",
-      especialidade: "Geral"
+    setFormData({ nome: "", email: "", senha: "", nivel: "Júnior", especialidade: "Geral" });
+  };
+
+  const abrirModalEditar = (tecnico: any) => {
+    setTecnicoEditando(tecnico);
+    setFormEditar({
+      nome: tecnico.nome || "",
+      email: tecnico.email || "",
+      nivel: tecnico.nivel || "Júnior",
+      especialidade: tecnico.especialidade || "Geral"
     });
+    setModalEditarAberto(true);
+  };
+
+  const fecharModalEditar = () => {
+    setModalEditarAberto(false);
+    setTecnicoEditando(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const response = await tecnicosAPI.criar(formData);
-
       if (response.success) {
-        setTecnicos([...tecnicos, response.data]);
         fecharModal();
         alert('Técnico criado com sucesso!');
         carregarDados();
       }
     } catch (error: any) {
-      console.error('Erro ao criar técnico:', error);
       alert(error.message || 'Erro ao criar técnico');
+    }
+  };
+
+  const handleEditar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tecnicoEditando) return;
+    try {
+      const response = await tecnicosAPI.atualizar(tecnicoEditando.id, formEditar);
+      if (response.success) {
+        fecharModalEditar();
+        alert('Técnico actualizado com sucesso!');
+        carregarDados();
+      } else {
+        alert(response.error || 'Erro ao actualizar técnico');
+      }
+    } catch (error: any) {
+      alert(error.message || 'Erro ao actualizar técnico');
     }
   };
 
@@ -97,40 +118,36 @@ export default function AdminTecnicos() {
 
   const handleVincular = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!userIdParaVincular.trim()) {
       alert('Por favor, insira um userId válido');
       return;
     }
-
     try {
       const response = await tecnicosAPI.vincularUsuario(tecnicoSelecionado.id, userIdParaVincular);
-
       if (response.success) {
         alert('Técnico vinculado com sucesso! O técnico precisa fazer logout e login novamente.');
         fecharModalVincular();
         carregarDados();
       }
     } catch (error: any) {
-      console.error('Erro ao vincular técnico:', error);
       alert(error.message || 'Erro ao vincular técnico');
     }
   };
 
-  {/* deletar tecnico */ }
-
-  const handleDeletar = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar este Tecnico?')) {
-      return;
-    }
+  const handleDeletar = async (id: string, nome: string) => {
+    if (!confirm(`Tem certeza que deseja eliminar o técnico "${nome}"?`)) return;
 
     try {
-      await tecnicosAPI.deletar(id);
-      setTecnicos(tecnicos.filter(c => c.id !== id));
-      alert('Tecnico deletado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao deletar tecnico:', error);
-      alert('Erro ao deletar tecnico');
+      const response = await tecnicosAPI.deletar(id);
+      if (response.success) {
+        setTecnicos(tecnicos.filter(t => t.id !== id));
+        alert('Técnico eliminado com sucesso!');
+      } else {
+        // Mostrar mensagem de erro com regra de negócio
+        alert(response.error || 'Erro ao eliminar técnico');
+      }
+    } catch (error: any) {
+      alert(error.message || 'Erro ao eliminar técnico');
     }
   };
 
@@ -144,9 +161,6 @@ export default function AdminTecnicos() {
       </div>
     );
   }
-
-
-
 
   const totalTecnicos = tecnicos.length;
   const totalIntervencoes = intervencoes.length;
@@ -162,7 +176,10 @@ export default function AdminTecnicos() {
           <h1 className="text-3xl font-bold text-gray-900">Gestão de Técnicos</h1>
           <p className="text-gray-600 mt-1">Monitore o desempenho da equipe</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors" onClick={abrirModal}>
+        <button
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          onClick={abrirModal}
+        >
           <Plus className="w-5 h-5" />
           Novo Técnico
         </button>
@@ -170,7 +187,7 @@ export default function AdminTecnicos() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <ClipboardList className="w-5 h-5 text-blue-600" />
             </div>
@@ -180,9 +197,8 @@ export default function AdminTecnicos() {
             </div>
           </div>
         </div>
-
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
@@ -192,9 +208,8 @@ export default function AdminTecnicos() {
             </div>
           </div>
         </div>
-
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
               <Clock className="w-5 h-5 text-purple-600" />
             </div>
@@ -204,9 +219,8 @@ export default function AdminTecnicos() {
             </div>
           </div>
         </div>
-
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
               <Star className="w-5 h-5 text-yellow-600" />
             </div>
@@ -224,26 +238,24 @@ export default function AdminTecnicos() {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                  {tecnico.nome.split(' ').map(n => n[0]).join('')}
+                  {tecnico.nome.split(' ').map((n: string) => n[0]).join('')}
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">{tecnico.nome}</h3>
                   <p className="text-sm text-gray-600">{tecnico.especialidade}</p>
-                  <p className="text-xs text-gray-400 mt-1 font-mono">ID: {tecnico.id}</p>
+                  <p className="text-xs text-gray-400 mt-1 font-mono">Nível: {tecnico.nivel}</p>
                 </div>
               </div>
-              <span className={`text-xs px-2 py-1 rounded ${tecnico.status === "Ativo" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
-                }`}>
-                {tecnico.status}
+              <span className={`text-xs px-2 py-1 rounded ${tecnico.status === "Ativo" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
+                {tecnico.status || "Ativo"}
               </span>
             </div>
 
-            <div className="space-y-3 mb-4">
+            <div className="space-y-2 mb-4">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">Email:</span>
                 <span className="text-gray-900">{tecnico.email}</span>
               </div>
-
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">Avaliação:</span>
                 <div className="flex items-center gap-1">
@@ -253,35 +265,39 @@ export default function AdminTecnicos() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 mb-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">{tecnico.intervencoesAtivas}</p>
+                <p className="text-2xl font-bold text-blue-600">{tecnico.intervencoesAtivas || 0}</p>
                 <p className="text-xs text-gray-600 mt-1">Ativas</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-green-600">{tecnico.intervencoesConcluidas}</p>
+                <p className="text-2xl font-bold text-green-600">{tecnico.intervencoesConcluidas || 0}</p>
                 <p className="text-xs text-gray-600 mt-1">Concluídas</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-purple-600">{tecnico.horasTrabalhadas}h</p>
+                <p className="text-2xl font-bold text-purple-600">{tecnico.horasTrabalhadas || 0}h</p>
                 <p className="text-xs text-gray-600 mt-1">Horas</p>
               </div>
             </div>
 
-            <div className="flex gap-2 mt-4">
-
-
+            <div className="flex gap-2">
               <button
-                onClick={() => handleDeletar(tecnico.id)}
-                className="flex-1 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors">
-
-                Deletar
+                onClick={() => abrirModalEditar(tecnico)}
+                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                <Edit className="w-4 h-4" />
+                Editar
               </button>
-
-
+              <button
+                onClick={() => handleDeletar(tecnico.id, tecnico.nome)}
+                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Eliminar
+              </button>
               <button
                 onClick={() => abrirModalVincular(tecnico)}
-                className="flex items-center gap-1 px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-sm font-medium transition-colors"
+                className="flex items-center gap-1 px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-sm font-medium transition-colors"
               >
                 <Link className="w-4 h-4" />
                 Vincular
@@ -291,135 +307,136 @@ export default function AdminTecnicos() {
         ))}
       </div>
 
-      {/* Modal para adicionar novo técnico */}
-      <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center ${modalAberto ? 'block' : 'hidden'}`}>
-        <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Novo Técnico</h2>
-            <button className="text-gray-500 hover:text-gray-700" onClick={fecharModal}>
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nome</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Senha</label>
-                <input
-                  type="password"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.senha}
-                  onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nível</label>
-                <select
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.nivel}
-                  onChange={(e) => setFormData({ ...formData, nivel: e.target.value })}
-                >
-                  <option value="Júnior">Júnior</option>
-                  <option value="Pleno">Pleno</option>
-                  <option value="Sênior">Sênior</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Especialidade</label>
-                <select
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.especialidade}
-                  onChange={(e) => setFormData({ ...formData, especialidade: e.target.value })}
-                >
-                  <option value="Geral">Geral</option>
-                  <option value="Infraestrutura">Infraestrutura</option>
-                  <option value="Aplicações">Aplicações</option>
-                </select>
-              </div>
-            </div>
-            <div className="mt-6">
-              <button
-                type="submit"
-                className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                Adicionar Técnico
+      {/* Modal Novo Técnico */}
+      {modalAberto && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Novo Técnico</h2>
+              <button onClick={fecharModal} className="text-gray-400 hover:text-gray-600">
+                <X className="w-6 h-6" />
               </button>
             </div>
-          </form>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                <input type="text" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.nome} onChange={(e) => setFormData({ ...formData, nome: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input type="email" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Senha *</label>
+                <input type="password" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.senha} onChange={(e) => setFormData({ ...formData, senha: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nível</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.nivel} onChange={(e) => setFormData({ ...formData, nivel: e.target.value })}>
+                  <option>Júnior</option>
+                  <option>Pleno</option>
+                  <option>Sênior</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.especialidade} onChange={(e) => setFormData({ ...formData, especialidade: e.target.value })}>
+                  <option>Geral</option>
+                  <option>Infraestrutura</option>
+                  <option>Aplicações</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={fecharModal} className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium">Cancelar</button>
+                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Criar</button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Modal para vincular técnico a um usuário */}
-      <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center ${modalVincularAberto ? 'block' : 'hidden'}`}>
-        <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Vincular Técnico a Usuário</h2>
-            <button className="text-gray-500 hover:text-gray-700" onClick={fecharModalVincular}>
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          <form onSubmit={handleVincular}>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nome do Técnico</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={tecnicoSelecionado?.nome || ""}
-                  readOnly
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email do Técnico</label>
-                <input
-                  type="email"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={tecnicoSelecionado?.email || ""}
-                  readOnly
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">UserId do Usuário</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={userIdParaVincular}
-                  onChange={(e) => setUserIdParaVincular(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-            <div className="mt-6">
-              <button
-                type="submit"
-                className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                Vincular Técnico
+      {/* Modal Editar Técnico */}
+      {modalEditarAberto && tecnicoEditando && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Editar Técnico</h2>
+              <button onClick={fecharModalEditar} className="text-gray-400 hover:text-gray-600">
+                <X className="w-6 h-6" />
               </button>
             </div>
-          </form>
+            <form onSubmit={handleEditar} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                <input type="text" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formEditar.nome} onChange={(e) => setFormEditar({ ...formEditar, nome: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input type="email" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formEditar.email} onChange={(e) => setFormEditar({ ...formEditar, email: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nível</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formEditar.nivel} onChange={(e) => setFormEditar({ ...formEditar, nivel: e.target.value })}>
+                  <option>Júnior</option>
+                  <option>Pleno</option>
+                  <option>Sênior</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formEditar.especialidade} onChange={(e) => setFormEditar({ ...formEditar, especialidade: e.target.value })}>
+                  <option>Geral</option>
+                  <option>Infraestrutura</option>
+                  <option>Aplicações</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={fecharModalEditar} className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium">Cancelar</button>
+                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Guardar</button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Modal Vincular */}
+      {modalVincularAberto && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Vincular Técnico a Usuário</h2>
+              <button onClick={fecharModalVincular} className="text-gray-400 hover:text-gray-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleVincular} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Técnico</label>
+                <input type="text" readOnly className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg"
+                  value={tecnicoSelecionado?.nome || ""} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">UserId do Usuário</label>
+                <input type="text" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={userIdParaVincular} onChange={(e) => setUserIdParaVincular(e.target.value)} />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={fecharModalVincular} className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium">Cancelar</button>
+                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Vincular</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
