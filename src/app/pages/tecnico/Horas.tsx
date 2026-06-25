@@ -364,7 +364,7 @@ export default function TecnicoHoras() {
                       {(() => {
                         const id = r.intervencaoId || r.intervencao_id;
                         const interv = intervencoes.find(i => i.id === id);
-                        return interv ? `${interv.numero} — ${interv.titulo}` : `#${id?.slice(0, 8)}`;
+                        return interv ? `${interv.numero}: ${interv.titulo}` : `#${id?.slice(0, 8)}`;
                       })()}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600 font-mono">
