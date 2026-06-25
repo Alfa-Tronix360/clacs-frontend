@@ -45,13 +45,14 @@ export default function TecnicoHoras() {
   const [descricao, setDescricao] = useState("");
   const [intervId, setIntervId] = useState(lsGet(K.id));
   const [cronAtivo, setCronAtivo] = useState(() => {
+    if (novoIdInicial) return true; // ← veio de Resolver, iniciar imediatamente
     const id = localStorage.getItem("cron_id");
     const paus = localStorage.getItem("cron_paus");
     const ini = localStorage.getItem("cron_ini");
     return !!id && paus !== "true" && !!ini;
   });
   const [pausado, setPausado] = useState(lsGet(K.paus) === "true");
-  const [iniciado, setIniciado] = useState(!!lsGet(K.id));
+  const [iniciado, setIniciado] = useState(!!novoIdInicial || !!lsGet(K.id));
   const [tempo, setTempo] = useState(getTotal());
   const [horaLabel, setHoraLabel] = useState(lsGet(K.hora));
   const ref = useRef<ReturnType<typeof setInterval> | null>(null);
