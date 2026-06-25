@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { intervencoesAPI, registrosHorasAPI, tecnicosAPI } from "../../services/api";
 
 interface Intervencao { id: string; numero: string; titulo: string; status: string; }
-interface RegistroHoras { id: string; intervencaoId: string; data: string; horas: number; horaInicio: string; horaFim: string; descricao?: string; }
+interface RegistroHoras { id: string; intervencaoId?: string; intervencao_id?: string; data: string; horas: number; horaInicio?: string; horaFim?: string; hora_inicio?: string; hora_fim?: string; descricao?: string; }
 
 const fmt = (s: number) => [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60].map(v => String(v).padStart(2, "0")).join(":");
 const toHHMM = (ts: number) => { const d = new Date(ts); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
@@ -360,9 +360,11 @@ export default function TecnicoHoras() {
                 {registros.map(r => (
                   <tr key={r.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 text-sm text-gray-600">{new Date(r.data).toLocaleDateString("pt-AO")}</td>
-                    <td className="py-3 px-4 text-sm text-gray-900">#{r.intervencaoId}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">#{r.intervencaoId || r.intervencao_id}</td>
                     <td className="py-3 px-4 text-sm text-gray-600 font-mono">
-                      {r.horaInicio && r.horaFim ? `${r.horaInicio} – ${r.horaFim}` : "—"}
+                      {(r.horaInicio || r.hora_inicio) && (r.horaFim || r.hora_fim)
+                        ? `${r.horaInicio || r.hora_inicio} – ${r.horaFim || r.hora_fim}`
+                        : "—"}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600">{r.descricao || "—"}</td>
                     <td className="py-3 px-4 text-sm font-semibold text-green-600 text-right">{r.horas.toFixed(2)}h</td>
