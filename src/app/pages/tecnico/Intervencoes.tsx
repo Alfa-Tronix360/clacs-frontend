@@ -43,11 +43,11 @@ export default function TecnicoIntervencoes() {
   };
 
   const handleResolver = (intervencao: any) => {
-    // Guardar no sessionStorage e navegar para Horas
+    console.log('ID da intervenção:', intervencao.id);
     sessionStorage.setItem('resolver_intervencao_id', intervencao.id);
+    console.log('sessionStorage após set:', sessionStorage.getItem('resolver_intervencao_id'));
     navigate('/tecnico/horas');
   };
-
   const handleVisualizarPDF = (intervencaoId: string) => {
     window.open(`${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`, '_blank');
   };
