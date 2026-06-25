@@ -10,7 +10,6 @@ const fmt = (s: number) => [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s
 const toHHMM = (ts: number) => { const d = new Date(ts); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
 const STATUS_FECHADOS = ["Resolvido", "Fechado", "Concluído"];
 
-// localStorage keys
 const K = { id: "cron_id", ini: "cron_ini", acum: "cron_acum", paus: "cron_paus", hora: "cron_hora" };
 const lsGet = (k: string) => localStorage.getItem(k) || "";
 const lsSet = (k: string, v: string) => localStorage.setItem(k, v);
@@ -28,6 +27,16 @@ export default function TecnicoHoras() {
   // Ler ID da URL
   const params = new URLSearchParams(window.location.search);
   const novoIdInicial = params.get('intervencaoId');
+
+  // Se não veio de Resolver, limpar qualquer sessão anterior
+  if (!novoIdInicial) {
+    localStorage.removeItem('cron_id');
+    localStorage.removeItem('cron_ini');
+    localStorage.removeItem('cron_acum');
+    localStorage.removeItem('cron_paus');
+    localStorage.removeItem('cron_hora');
+  }
+
   if (novoIdInicial && localStorage.getItem("cron_id") !== novoIdInicial) {
     const agora = Date.now();
     const hi = toHHMM(agora);
@@ -37,6 +46,7 @@ export default function TecnicoHoras() {
     localStorage.setItem("cron_paus", "false");
     localStorage.setItem("cron_hora", hi);
   }
+
   const [intervencoes, setIntervencoes] = useState<Intervencao[]>([]);
   const [registros, setRegistros] = useState<RegistroHoras[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +55,7 @@ export default function TecnicoHoras() {
   const [descricao, setDescricao] = useState("");
   const [intervId, setIntervId] = useState(lsGet(K.id));
   const [cronAtivo, setCronAtivo] = useState(() => {
-    if (novoIdInicial) return true; // ← veio de Resolver, iniciar imediatamente
+    if (novoIdInicial) return true;
     const id = localStorage.getItem("cron_id");
     const paus = localStorage.getItem("cron_paus");
     const ini = localStorage.getItem("cron_ini");
@@ -58,10 +68,7 @@ export default function TecnicoHoras() {
   const ref = useRef<ReturnType<typeof setInterval> | null>(null);
   const usuarioId = localStorage.getItem("userId");
 
-  // Inicia o intervalo do contador — não depende de estado React
   const startInterval = () => {
-
-
     if (ref.current) clearInterval(ref.current);
     ref.current = setInterval(() => setTempo(getTotal()), 1000);
   };
@@ -71,7 +78,7 @@ export default function TecnicoHoras() {
       startInterval();
     }
   }, []);
-  // Função principal de início — reutilizada pelo botão E pelo sessionStorage
+
   const iniciar = (id: string) => {
     const agora = Date.now();
     const hi = toHHMM(agora);
@@ -86,7 +93,7 @@ export default function TecnicoHoras() {
     setCronAtivo(true);
     setPausado(false);
     setIniciado(true);
-    startInterval(); // ← intervalo inicia aqui, independente do setState
+    startInterval();
   };
 
   const carregarDados = useCallback(async (tId: string) => {
@@ -107,17 +114,15 @@ export default function TecnicoHoras() {
         if (!tr.success || !tr.data) { setLoading(false); return; }
         const tId: string = tr.data.id;
         setTecnicoId(tId);
+        localStorage.setItem("cron_tecnico_id", tId);
         await carregarDados(tId);
 
-        // Veio de "Resolver"?
-        // Adicionar no useEffect, depois de carregarDados:
-        if (novoIdInicial && localStorage.getItem("cron_id") !== novoIdInicial) {
+        if (novoIdInicial) {
           intervencoesAPI.atualizarStatus(novoIdInicial, "Em Andamento").catch(console.error);
         }
 
-        // Sessão activa anterior?
         const idGuardado = lsGet(K.id);
-        if (idGuardado) {
+        if (idGuardado && !novoIdInicial) {
           const estaPausado = lsGet(K.paus) === "true";
           setIntervId(idGuardado);
           setHoraLabel(lsGet(K.hora));
@@ -126,7 +131,7 @@ export default function TecnicoHoras() {
           if (!estaPausado) {
             setCronAtivo(true);
             setPausado(false);
-            startInterval(); // ← intervalo inicia aqui também
+            startInterval();
           } else {
             setCronAtivo(false);
             setPausado(true);
@@ -163,10 +168,10 @@ export default function TecnicoHoras() {
   };
 
   const salvar = async () => {
-    console.log("SALVAR:", { intervId, tecnicoId, descricao: descricao.trim(), total: getTotal() });
+    const tId = tecnicoId || localStorage.getItem("cron_tecnico_id");
     if (!intervId) { mostrar("erro", "Nenhuma intervenção seleccionada."); return; }
     if (!descricao.trim()) { mostrar("erro", "Preencha a descrição da solução."); return; }
-    if (!tecnicoId) { mostrar("erro", "Técnico não identificado."); return; }
+    if (!tId) { mostrar("erro", "Técnico não identificado."); return; }
     const total = getTotal();
     if (total === 0) { mostrar("erro", "Inicie o cronómetro antes de salvar."); return; }
     if (ref.current) clearInterval(ref.current);
@@ -174,13 +179,15 @@ export default function TecnicoHoras() {
     const horaFim = toHHMM(Date.now());
     try {
       await registrosHorasAPI.criar({
-        intervencao_id: intervId, tecnico_id: tecnicoId,
+        intervencao_id: intervId, tecnico_id: tId,
         horas: total / 3600, hora_inicio: horaInicio, hora_fim: horaFim,
         data: new Date().toISOString(), descricao: descricao.trim(),
       });
       await intervencoesAPI.atualizarStatus(intervId, "Resolvido");
       mostrar("sucesso", `Guardado! (${horaInicio} – ${horaFim}). Intervenção marcada como resolvida.`);
       lsClear();
+      localStorage.removeItem("cron_tecnico_id");
+      window.history.replaceState({}, document.title, '/tecnico/horas');
       setCronAtivo(false); setPausado(false); setIniciado(false);
       setTempo(0); setIntervId(""); setHoraLabel(""); setDescricao("");
       setTimeout(() => navigate('/tecnico/intervencoes'), 1500);
