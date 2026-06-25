@@ -360,7 +360,13 @@ export default function TecnicoHoras() {
                 {registros.map(r => (
                   <tr key={r.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 text-sm text-gray-600">{new Date(r.data).toLocaleDateString("pt-AO")}</td>
-                    <td className="py-3 px-4 text-sm text-gray-900">#{r.intervencaoId || r.intervencao_id}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">
+                      {(() => {
+                        const id = r.intervencaoId || r.intervencao_id;
+                        const interv = intervencoes.find(i => i.id === id);
+                        return interv ? `${interv.numero} — ${interv.titulo}` : `#${id?.slice(0, 8)}`;
+                      })()}
+                    </td>
                     <td className="py-3 px-4 text-sm text-gray-600 font-mono">
                       {(r.horaInicio || r.hora_inicio) && (r.horaFim || r.hora_fim)
                         ? `${r.horaInicio || r.hora_inicio} – ${r.horaFim || r.hora_fim}`
