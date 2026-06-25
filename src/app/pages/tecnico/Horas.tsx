@@ -24,6 +24,8 @@ const getTotal = () => {
 
 export default function TecnicoHoras() {
   const navigate = useNavigate();
+  console.log('HORAS MONTOU - session:', sessionStorage.getItem('resolver_intervencao_id'));
+  console.log('HORAS MONTOU - ls_id:', localStorage.getItem('cron_id'));
   // Ler sessionStorage ANTES de qualquer useState
   const novoIdInicial = sessionStorage.getItem("resolver_intervencao_id");
   if (novoIdInicial) {

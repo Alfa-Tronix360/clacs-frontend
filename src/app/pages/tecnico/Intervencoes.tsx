@@ -43,9 +43,9 @@ export default function TecnicoIntervencoes() {
   };
 
   const handleResolver = (intervencao: any) => {
-    console.log('ID da intervenção:', intervencao.id);
+    console.log('ANTES - session:', sessionStorage.getItem('resolver_intervencao_id'));
     sessionStorage.setItem('resolver_intervencao_id', intervencao.id);
-    console.log('sessionStorage após set:', sessionStorage.getItem('resolver_intervencao_id'));
+    console.log('DEPOIS - session:', sessionStorage.getItem('resolver_intervencao_id'));
     navigate('/tecnico/horas');
   };
   const handleVisualizarPDF = (intervencaoId: string) => {
