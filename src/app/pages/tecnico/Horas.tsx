@@ -24,6 +24,18 @@ const getTotal = () => {
 
 export default function TecnicoHoras() {
   const navigate = useNavigate();
+  // Ler sessionStorage ANTES de qualquer useState
+  const novoIdInicial = sessionStorage.getItem("resolver_intervencao_id");
+  if (novoIdInicial) {
+    sessionStorage.removeItem("resolver_intervencao_id");
+    const agora = Date.now();
+    const hi = toHHMM(agora);
+    localStorage.setItem("cron_id", novoIdInicial);
+    localStorage.setItem("cron_ini", String(agora));
+    localStorage.setItem("cron_acum", "0");
+    localStorage.setItem("cron_paus", "false");
+    localStorage.setItem("cron_hora", hi);
+  }
   const [intervencoes, setIntervencoes] = useState<Intervencao[]>([]);
   const [registros, setRegistros] = useState<RegistroHoras[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,12 +96,9 @@ export default function TecnicoHoras() {
         await carregarDados(tId);
 
         // Veio de "Resolver"?
-        const novoId = sessionStorage.getItem("resolver_intervencao_id");
-        if (novoId) {
-          sessionStorage.removeItem("resolver_intervencao_id");
-          iniciar(novoId); // ← mesma função do botão Iniciar
-          intervencoesAPI.atualizarStatus(novoId, "Em Andamento").catch(console.error);
-          return;
+        // Adicionar no useEffect, depois de carregarDados:
+        if (novoIdInicial) {
+          intervencoesAPI.atualizarStatus(novoIdInicial, "Em Andamento").catch(console.error);
         }
 
         // Sessão activa anterior?
@@ -140,6 +149,7 @@ export default function TecnicoHoras() {
   };
 
   const salvar = async () => {
+    console.log("SALVAR:", { intervId, tecnicoId, descricao: descricao.trim(), total: getTotal() });
     if (!intervId) { mostrar("erro", "Nenhuma intervenção seleccionada."); return; }
     if (!descricao.trim()) { mostrar("erro", "Preencha a descrição da solução."); return; }
     if (!tecnicoId) { mostrar("erro", "Técnico não identificado."); return; }
