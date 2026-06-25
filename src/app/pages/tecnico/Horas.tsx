@@ -107,21 +107,27 @@ export default function TecnicoHoras() {
 
   // Iniciar cronómetro automaticamente se veio de "Resolver"
   useEffect(() => {
-    if (location.state?.intervencaoId && intervencoes.length > 0) {
-      const id = location.state.intervencaoId;
-      setIntervencaoSelecionada(id);
-      setIntervencaoVeioDeResolver(true);
+    const intervencaoId = location.state?.intervencaoId;
+    if (!intervencaoId) return;
 
-      tsInicio.current = Date.now();
-      primeiroInicio.current = Date.now();
-      tempoAcumulado.current = 0;
-      setCronometroAtivo(true);
-      setPausado(false);
-      setIniciado(true);
+    // Seleccionar intervenção imediatamente, mesmo antes de carregar lista
+    setIntervencaoSelecionada(intervencaoId);
+    setIntervencaoVeioDeResolver(true);
 
-      intervencoesAPI.atualizarStatus(id, "Em Andamento").catch(console.error);
-    }
-  }, [location.state, intervencoes]);
+    // Iniciar cronómetro imediatamente
+    tsInicio.current = Date.now();
+    primeiroInicio.current = Date.now();
+    tempoAcumulado.current = 0;
+    setCronometroAtivo(true);
+    setPausado(false);
+    setIniciado(true);
+
+    // Marcar como Em Andamento no backend
+    intervencoesAPI.atualizarStatus(intervencaoId, "Em Andamento").catch(console.error);
+
+    // Limpar o state para não re-iniciar se o componente re-renderizar
+    window.history.replaceState({}, document.title);
+  }, [location.state?.intervencaoId]);
 
   const mostrarMensagem = (tipo: "sucesso" | "erro", texto: string) => {
     setMensagem({ tipo, texto });
