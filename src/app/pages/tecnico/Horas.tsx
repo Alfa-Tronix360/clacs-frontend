@@ -1,6 +1,6 @@
 import { Clock, Pause, Save, Calendar, Loader, Play } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { intervencoesAPI, registrosHorasAPI, tecnicosAPI } from "../../services/api";
 
 interface Intervencao {
@@ -34,8 +34,14 @@ const timestampParaHoraLocal = (ts: number): string => {
 
 const STATUS_FECHADOS = ["Resolvido", "Fechado", "Concluído"];
 
+// Chaves do localStorage
+const LS_INTERVENCAO_ID = "cron_intervencao_id";
+const LS_INICIO_TS = "cron_inicio_ts";         // timestamp quando iniciou (ms)
+const LS_ACUMULADO = "cron_acumulado_s";        // segundos acumulados antes da última pausa
+const LS_PAUSADO = "cron_pausado";              // "true" | "false"
+const LS_HORA_INICIO = "cron_hora_inicio";      // HH:MM para o registo
+
 export default function TecnicoHoras() {
-  const location = useLocation();
   const navigate = useNavigate();
 
   const [intervencoes, setIntervencoes] = useState<Intervencao[]>([]);
@@ -43,36 +49,39 @@ export default function TecnicoHoras() {
   const [loading, setLoading] = useState(true);
   const [mensagem, setMensagem] = useState<{ tipo: "sucesso" | "erro"; texto: string } | null>(null);
 
-  const tsInicio = useRef<number | null>(null);
-  const primeiroInicio = useRef<number | null>(null);
-  const tempoAcumulado = useRef<number>(0);
   const [cronometroAtivo, setCronometroAtivo] = useState(false);
   const [tempoDecorrido, setTempoDecorrido] = useState(0);
   const [pausado, setPausado] = useState(false);
-  const [iniciado, setIniciado] = useState(false); // já começou alguma vez?
+  const [iniciado, setIniciado] = useState(false);
 
   const [intervencaoSelecionada, setIntervencaoSelecionada] = useState("");
   const [intervencaoVeioDeResolver, setIntervencaoVeioDeResolver] = useState(false);
   const [descricaoTarefa, setDescricaoTarefa] = useState("");
   const [tecnicoId, setTecnicoId] = useState<string | null>(null);
 
+  const intervaloRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const usuarioId = localStorage.getItem("userId");
 
-  // Intervalo do cronómetro
-  useEffect(() => {
-    if (!cronometroAtivo) return;
-    const intervalo = setInterval(() => {
-      if (tsInicio.current !== null) {
-        const s = Math.floor((Date.now() - tsInicio.current) / 1000);
-        setTempoDecorrido(tempoAcumulado.current + s);
-      }
+  // Calcular tempo total tendo em conta o acumulado + tempo desde último início
+  const calcularTempoTotal = (): number => {
+    const acumulado = parseInt(localStorage.getItem(LS_ACUMULADO) || "0");
+    const inicioTs = localStorage.getItem(LS_INICIO_TS);
+    const estaPausado = localStorage.getItem(LS_PAUSADO) === "true";
+
+    if (estaPausado || !inicioTs) return acumulado;
+    const segundosDesdeInicio = Math.floor((Date.now() - parseInt(inicioTs)) / 1000);
+    return acumulado + segundosDesdeInicio;
+  };
+
+  const iniciarIntervalo = () => {
+    if (intervaloRef.current) clearInterval(intervaloRef.current);
+    intervaloRef.current = setInterval(() => {
+      setTempoDecorrido(calcularTempoTotal());
     }, 1000);
-    return () => clearInterval(intervalo);
-  }, [cronometroAtivo]);
+  };
 
   const carregarDados = useCallback(async (idTecnico: string) => {
     try {
-      setLoading(true);
       const [intervencoesRes, registrosRes] = await Promise.all([
         intervencoesAPI.listarPorTecnico(idTecnico),
         registrosHorasAPI.listarPorTecnico(idTecnico),
@@ -81,113 +90,124 @@ export default function TecnicoHoras() {
       if (registrosRes.success) setRegistrosHoras(registrosRes.data);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
+  // Ao montar: verificar se há sessão activa no localStorage
   useEffect(() => {
     if (!usuarioId) { setLoading(false); return; }
+
     (async () => {
       try {
+        setLoading(true);
         const tecnicoRes = await tecnicosAPI.buscarPorUsuarioId(usuarioId);
-        if (tecnicoRes.success && tecnicoRes.data) {
-          const id: string = tecnicoRes.data.id;
-          setTecnicoId(id);
-          await carregarDados(id);
+        if (!tecnicoRes.success || !tecnicoRes.data) { setLoading(false); return; }
+
+        const id: string = tecnicoRes.data.id;
+        setTecnicoId(id);
+        await carregarDados(id);
+
+        // Verificar se veio de "Resolver" via sessionStorage
+        const novaIntervencaoId = sessionStorage.getItem("resolver_intervencao_id");
+        if (novaIntervencaoId) {
+          sessionStorage.removeItem("resolver_intervencao_id");
+          // Iniciar nova sessão no localStorage
+          const agora = Date.now();
+          const horaInicio = timestampParaHoraLocal(agora);
+          localStorage.setItem(LS_INTERVENCAO_ID, novaIntervencaoId);
+          localStorage.setItem(LS_INICIO_TS, String(agora));
+          localStorage.setItem(LS_ACUMULADO, "0");
+          localStorage.setItem(LS_PAUSADO, "false");
+          localStorage.setItem(LS_HORA_INICIO, horaInicio);
+
+          setIntervencaoSelecionada(novaIntervencaoId);
+          setIntervencaoVeioDeResolver(true);
+          setCronometroAtivo(true);
+          setPausado(false);
+          setIniciado(true);
+          iniciarIntervalo();
+          intervencoesAPI.atualizarStatus(novaIntervencaoId, "Em Andamento").catch(console.error);
+
         } else {
-          setLoading(false);
+          // Verificar se há sessão activa anterior no localStorage
+          const intervencaoGuardada = localStorage.getItem(LS_INTERVENCAO_ID);
+          if (intervencaoGuardada) {
+            const estaPausado = localStorage.getItem(LS_PAUSADO) === "true";
+            setIntervencaoSelecionada(intervencaoGuardada);
+            setIntervencaoVeioDeResolver(true);
+            setIniciado(true);
+            setTempoDecorrido(calcularTempoTotal());
+
+            if (!estaPausado) {
+              setCronometroAtivo(true);
+              setPausado(false);
+              iniciarIntervalo();
+            } else {
+              setCronometroAtivo(false);
+              setPausado(true);
+            }
+          }
         }
       } catch (error) {
-        console.error("Erro ao carregar ID do técnico:", error);
+        console.error("Erro ao carregar:", error);
+      } finally {
         setLoading(false);
       }
     })();
-  }, [usuarioId, carregarDados]);
 
-  // Iniciar cronómetro automaticamente se veio de "Resolver"
-  useEffect(() => {
-    const intervencaoId = location.state?.intervencaoId;
-    if (!intervencaoId) return;
-
-    // Seleccionar intervenção imediatamente, mesmo antes de carregar lista
-    setIntervencaoSelecionada(intervencaoId);
-    setIntervencaoVeioDeResolver(true);
-
-    // Iniciar cronómetro imediatamente
-    tsInicio.current = Date.now();
-    primeiroInicio.current = Date.now();
-    tempoAcumulado.current = 0;
-    setCronometroAtivo(true);
-    setPausado(false);
-    setIniciado(true);
-
-    // Marcar como Em Andamento no backend
-    intervencoesAPI.atualizarStatus(intervencaoId, "Em Andamento").catch(console.error);
-
-    // Limpar o state para não re-iniciar se o componente re-renderizar
-    window.history.replaceState({}, document.title);
-  }, [location.state?.intervencaoId]);
+    return () => { if (intervaloRef.current) clearInterval(intervaloRef.current); };
+  }, [usuarioId]);
 
   const mostrarMensagem = (tipo: "sucesso" | "erro", texto: string) => {
     setMensagem({ tipo, texto });
     setTimeout(() => setMensagem(null), 4000);
   };
 
-  const toggleCronometro = async () => {
-    if (!intervencaoSelecionada) {
-      mostrarMensagem("erro", "Selecione uma intervenção primeiro.");
-      return;
-    }
+  const pausar = () => {
+    // Guardar tempo acumulado e marcar como pausado no localStorage
+    const totalAgora = calcularTempoTotal();
+    localStorage.setItem(LS_ACUMULADO, String(totalAgora));
+    localStorage.setItem(LS_INICIO_TS, "");
+    localStorage.setItem(LS_PAUSADO, "true");
 
-    if (!cronometroAtivo) {
-      // INICIAR ou RETOMAR
-      tsInicio.current = Date.now();
-      if (primeiroInicio.current === null) primeiroInicio.current = Date.now();
+    if (intervaloRef.current) clearInterval(intervaloRef.current);
+    setTempoDecorrido(totalAgora);
+    setCronometroAtivo(false);
+    setPausado(true);
+  };
 
-      try {
-        const intervencao = intervencoes.find((i) => i.id === intervencaoSelecionada);
-        if (intervencao?.status === "Aberto") {
-          await intervencoesAPI.atualizarStatus(intervencaoSelecionada, "Em Andamento");
-          if (tecnicoId) await carregarDados(tecnicoId);
-        }
-      } catch (error) {
-        console.error("Erro ao atualizar status:", error);
-      }
+  const retomar = () => {
+    const agora = Date.now();
+    localStorage.setItem(LS_INICIO_TS, String(agora));
+    localStorage.setItem(LS_PAUSADO, "false");
 
-      setCronometroAtivo(true);
-      setPausado(false);
-      setIniciado(true);
-    } else {
-      // PAUSAR
-      if (tsInicio.current !== null) {
-        tempoAcumulado.current += Math.floor((Date.now() - tsInicio.current) / 1000);
-        setTempoDecorrido(tempoAcumulado.current);
-      }
-      tsInicio.current = null;
-      setCronometroAtivo(false);
-      setPausado(true);
-    }
+    setCronometroAtivo(true);
+    setPausado(false);
+    iniciarIntervalo();
+  };
+
+  const limparSessao = () => {
+    localStorage.removeItem(LS_INTERVENCAO_ID);
+    localStorage.removeItem(LS_INICIO_TS);
+    localStorage.removeItem(LS_ACUMULADO);
+    localStorage.removeItem(LS_PAUSADO);
+    localStorage.removeItem(LS_HORA_INICIO);
   };
 
   const salvarTempo = async () => {
     if (!intervencaoSelecionada) {
-      mostrarMensagem("erro", "Selecione uma intervenção primeiro.");
+      mostrarMensagem("erro", "Nenhuma intervenção seleccionada.");
       return;
     }
 
-    // Se ainda está a contar, parar primeiro para calcular tempo total
-    let totalSegundos = tempoAcumulado.current;
-    if (cronometroAtivo && tsInicio.current !== null) {
-      totalSegundos += Math.floor((Date.now() - tsInicio.current) / 1000);
-    }
+    const totalSegundos = calcularTempoTotal();
 
     if (totalSegundos === 0) {
       mostrarMensagem("erro", "Inicie o cronómetro antes de salvar.");
       return;
     }
     if (!descricaoTarefa.trim()) {
-      mostrarMensagem("erro", "A descrição da solução é obrigatória. Pause o cronómetro para preencher.");
+      mostrarMensagem("erro", "A descrição da solução é obrigatória.");
       return;
     }
     if (!tecnicoId) {
@@ -195,13 +215,14 @@ export default function TecnicoHoras() {
       return;
     }
 
-    const tsInicioMs = primeiroInicio.current ?? (Date.now() - totalSegundos * 1000);
-    const tsFimMs = Date.now();
-    const horaInicio = timestampParaHoraLocal(tsInicioMs);
-    const horaFim = timestampParaHoraLocal(tsFimMs);
+    const horaInicio = localStorage.getItem(LS_HORA_INICIO) || timestampParaHoraLocal(Date.now() - totalSegundos * 1000);
+    const horaFim = timestampParaHoraLocal(Date.now());
     const horas = totalSegundos / 3600;
 
     try {
+      // Parar cronómetro antes de guardar
+      if (intervaloRef.current) clearInterval(intervaloRef.current);
+
       await registrosHorasAPI.criar({
         intervencao_id: intervencaoSelecionada,
         tecnico_id: tecnicoId,
@@ -216,41 +237,38 @@ export default function TecnicoHoras() {
 
       mostrarMensagem("sucesso", `Tempo registado (${horaInicio} – ${horaFim}). Intervenção marcada como resolvida.`);
 
-      // Reset completo
+      // Limpar tudo
+      limparSessao();
       setCronometroAtivo(false);
       setPausado(false);
       setIniciado(false);
       setTempoDecorrido(0);
-      tsInicio.current = null;
-      primeiroInicio.current = null;
-      tempoAcumulado.current = 0;
       setIntervencaoSelecionada("");
       setIntervencaoVeioDeResolver(false);
       setDescricaoTarefa("");
 
-      // Redirecionar para Minhas Intervenções após 1.5s
-      setTimeout(() => {
-        navigate('/tecnico/intervencoes');
-      }, 1500);
+      // Redirecionar após 1.5s
+      setTimeout(() => { navigate('/tecnico/intervencoes'); }, 1500);
 
     } catch (error) {
-      console.error("Erro ao salvar registo:", error);
+      console.error("Erro ao salvar:", error);
       mostrarMensagem("erro", "Erro ao salvar registo de horas. Tente novamente.");
     }
   };
 
-  const calcularHoras = (filtro: (r: RegistroHoras) => boolean) =>
+  const calcularHorasRegistos = (filtro: (r: RegistroHoras) => boolean) =>
     registrosHoras.filter(filtro).reduce((acc, r) => acc + (r.horas ?? 0), 0);
 
   const hoje = new Date();
-  const horasHoje = calcularHoras((r) => new Date(r.data).toDateString() === hoje.toDateString());
-  const horasSemana = calcularHoras((r) => (hoje.getTime() - new Date(r.data).getTime()) / 86_400_000 < 7);
-  const horasMes = calcularHoras((r) => {
+  const horasHoje = calcularHorasRegistos((r) => new Date(r.data).toDateString() === hoje.toDateString());
+  const horasSemana = calcularHorasRegistos((r) => (hoje.getTime() - new Date(r.data).getTime()) / 86_400_000 < 7);
+  const horasMes = calcularHorasRegistos((r) => {
     const d = new Date(r.data);
     return d.getMonth() === hoje.getMonth() && d.getFullYear() === hoje.getFullYear();
   });
 
   const intervencaoActual = intervencoes.find(i => i.id === intervencaoSelecionada);
+  const horaInicioGuardada = localStorage.getItem(LS_HORA_INICIO);
 
   if (loading) {
     return (
@@ -311,34 +329,30 @@ export default function TecnicoHoras() {
               <div className="w-full px-4 py-2 border border-green-300 bg-green-50 rounded-lg text-green-800 font-medium">
                 {intervencaoActual.numero} — {intervencaoActual.titulo}
               </div>
+            ) : intervencaoVeioDeResolver && !intervencaoActual ? (
+              <div className="w-full px-4 py-2 border border-green-300 bg-green-50 rounded-lg text-green-600 text-sm">
+                A carregar intervenção...
+              </div>
             ) : (
               <select
                 value={intervencaoSelecionada}
                 onChange={(e) => setIntervencaoSelecionada(e.target.value)}
-                disabled={cronometroAtivo || tempoAcumulado.current > 0}
+                disabled={cronometroAtivo}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
               >
-                <option value="">
-                  {intervencoes.length === 0 ? "Nenhuma intervenção atribuída..." : "Escolha uma intervenção..."}
-                </option>
-                {intervencoes
-                  .filter((i) => !STATUS_FECHADOS.includes(i.status))
-                  .map((intervencao) => (
-                    <option key={intervencao.id} value={intervencao.id}>
-                      {intervencao.numero} — {intervencao.titulo}
-                    </option>
-                  ))}
+                <option value="">Escolha uma intervenção...</option>
+                {intervencoes.filter((i) => !STATUS_FECHADOS.includes(i.status)).map((i) => (
+                  <option key={i.id} value={i.id}>{i.numero} — {i.titulo}</option>
+                ))}
               </select>
             )}
           </div>
 
-          {/* Descrição — desabilitada enquanto cronómetro activo */}
+          {/* Descrição */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Descrição da Solução <span className="text-red-500">*</span>
-              {cronometroAtivo && (
-                <span className="ml-2 text-xs text-gray-400">(pause para preencher)</span>
-              )}
+              {cronometroAtivo && <span className="ml-2 text-xs text-gray-400">(pause para preencher)</span>}
             </label>
             <textarea
               value={descricaoTarefa}
@@ -354,15 +368,15 @@ export default function TecnicoHoras() {
             />
           </div>
 
-          {/* Display do tempo */}
+          {/* Display */}
           <div className="text-center py-8">
             <div className={`text-6xl font-bold mb-2 font-mono transition-colors ${cronometroAtivo ? "text-green-600" : pausado ? "text-yellow-600" : "text-gray-400"}`}>
               {formatarTempo(tempoDecorrido)}
             </div>
 
-            {primeiroInicio.current ? (
+            {horaInicioGuardada && iniciado ? (
               <p className="text-sm text-gray-500 mb-4">
-                Iniciado às <span className="font-semibold">{timestampParaHoraLocal(primeiroInicio.current)}</span>
+                Iniciado às <span className="font-semibold">{horaInicioGuardada}</span>
                 {cronometroAtivo
                   ? <span className="ml-2 text-green-600 font-medium">● A contar</span>
                   : <span className="ml-2 text-yellow-600 font-medium">⏸ Pausado</span>}
@@ -377,43 +391,52 @@ export default function TecnicoHoras() {
               </p>
             )}
 
-            {/* BOTÕES */}
+            {/* Botões */}
             <div className="flex gap-3 justify-center mt-2">
-
               {/* Pausar / Retomar / Iniciar */}
-              <button
-                onClick={toggleCronometro}
-                disabled={!intervencaoSelecionada && !cronometroAtivo}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${cronometroAtivo
-                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                  : iniciado
-                    ? "bg-green-600 hover:bg-green-700 text-white"
-                    : "bg-green-600 hover:bg-green-700 text-white"}`}
-              >
-                {cronometroAtivo ? (
-                  <><Pause className="w-5 h-5" /> Pausar</>
-                ) : iniciado ? (
-                  <><Play className="w-5 h-5" /> Retomar</>
-                ) : (
-                  <><Play className="w-5 h-5" /> Iniciar</>
-                )}
-              </button>
-
-              {/* Salvar — aparece sempre que já iniciou (ativo ou pausado) */}
-              {iniciado && (
+              {cronometroAtivo ? (
+                <button onClick={pausar}
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium bg-yellow-500 hover:bg-yellow-600 text-white transition-colors">
+                  <Pause className="w-5 h-5" /> Pausar
+                </button>
+              ) : pausado ? (
+                <button onClick={retomar}
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium bg-green-600 hover:bg-green-700 text-white transition-colors">
+                  <Play className="w-5 h-5" /> Retomar
+                </button>
+              ) : (
                 <button
-                  onClick={salvarTempo}
-                  className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Save className="w-5 h-5" />
-                  Salvar
+                  onClick={() => {
+                    if (!intervencaoSelecionada) { mostrarMensagem("erro", "Selecione uma intervenção."); return; }
+                    const agora = Date.now();
+                    const horaInicio = timestampParaHoraLocal(agora);
+                    localStorage.setItem(LS_INTERVENCAO_ID, intervencaoSelecionada);
+                    localStorage.setItem(LS_INICIO_TS, String(agora));
+                    localStorage.setItem(LS_ACUMULADO, "0");
+                    localStorage.setItem(LS_PAUSADO, "false");
+                    localStorage.setItem(LS_HORA_INICIO, horaInicio);
+                    setCronometroAtivo(true);
+                    setIniciado(true);
+                    iniciarIntervalo();
+                  }}
+                  disabled={!intervencaoSelecionada}
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white transition-colors">
+                  <Play className="w-5 h-5" /> Iniciar
+                </button>
+              )}
+
+              {/* Salvar — sempre visível quando iniciado */}
+              {iniciado && (
+                <button onClick={salvarTempo}
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium bg-blue-600 hover:bg-blue-700 text-white transition-colors">
+                  <Save className="w-5 h-5" /> Salvar
                 </button>
               )}
             </div>
 
-            {cronometroAtivo && iniciado && (
+            {cronometroAtivo && (
               <p className="text-xs text-gray-400 mt-3">
-                Pause o cronómetro para preencher a descrição antes de salvar
+                Pode navegar para outras páginas — o cronómetro continua a contar
               </p>
             )}
           </div>
@@ -440,17 +463,13 @@ export default function TecnicoHoras() {
               <tbody>
                 {registrosHoras.map((registro) => (
                   <tr key={registro.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-sm text-gray-600">
-                      {new Date(registro.data).toLocaleDateString("pt-AO")}
-                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-600">{new Date(registro.data).toLocaleDateString("pt-AO")}</td>
                     <td className="py-3 px-4 text-sm text-gray-900">#{registro.intervencaoId}</td>
                     <td className="py-3 px-4 text-sm text-gray-600 font-mono">
                       {registro.horaInicio && registro.horaFim ? `${registro.horaInicio} – ${registro.horaFim}` : "—"}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600">{registro.descricao || "—"}</td>
-                    <td className="py-3 px-4 text-sm font-semibold text-green-600 text-right">
-                      {registro.horas.toFixed(2)}h
-                    </td>
+                    <td className="py-3 px-4 text-sm font-semibold text-green-600 text-right">{registro.horas.toFixed(2)}h</td>
                   </tr>
                 ))}
               </tbody>
