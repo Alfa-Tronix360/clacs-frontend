@@ -227,13 +227,11 @@ export default function TecnicoIntervencoes() {
                     <FileText className="w-4 h-4" /> Baixar PDF
                   </button>
 
-                  {/* Botão Editar — apenas para intervenções não finalizadas */}
-                  {!["Resolvido", "Fechado", "Concluído"].includes(intervencao.status) && (
-                    <button onClick={() => abrirEdicao(intervencao)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-colors">
-                      <Edit className="w-4 h-4" /> Editar
-                    </button>
-                  )}
+                  {/* Botão Editar — sempre visível */}
+                  <button onClick={() => abrirEdicao(intervencao)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-colors">
+                    <Edit className="w-4 h-4" /> Editar
+                  </button>
 
                   {/* Botão Resolver */}
                   {!["Resolvido", "Fechado", "Concluído"].includes(intervencao.status) && (
