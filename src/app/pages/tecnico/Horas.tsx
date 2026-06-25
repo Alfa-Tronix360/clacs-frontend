@@ -367,7 +367,7 @@ export default function TecnicoHoras() {
                         return interv ? `${interv.numero}: ${interv.titulo}` : `#${id?.slice(0, 8)}`;
                       })()}
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600 font-mono">
+                    <td className="py-3 px-4 text-sm text-gray-600 font-mono whitespace-nowrap">
                       {(r.horaInicio || r.hora_inicio) && (r.horaFim || r.hora_fim)
                         ? `${r.horaInicio || r.hora_inicio} – ${r.horaFim || r.hora_fim}`
                         : "—"}
