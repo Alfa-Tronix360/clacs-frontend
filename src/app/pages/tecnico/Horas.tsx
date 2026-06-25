@@ -28,7 +28,7 @@ export default function TecnicoHoras() {
   // Ler ID da URL
   const params = new URLSearchParams(window.location.search);
   const novoIdInicial = params.get('intervencaoId');
-  if (novoIdInicial) {
+  if (novoIdInicial && localStorage.getItem("cron_id") !== novoIdInicial) {
     const agora = Date.now();
     const hi = toHHMM(agora);
     localStorage.setItem("cron_id", novoIdInicial);
@@ -111,7 +111,7 @@ export default function TecnicoHoras() {
 
         // Veio de "Resolver"?
         // Adicionar no useEffect, depois de carregarDados:
-        if (novoIdInicial) {
+        if (novoIdInicial && localStorage.getItem("cron_id") !== novoIdInicial) {
           intervencoesAPI.atualizarStatus(novoIdInicial, "Em Andamento").catch(console.error);
         }
 
