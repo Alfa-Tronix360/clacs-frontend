@@ -29,14 +29,13 @@ export default function TecnicoHoras() {
   const novoIdInicial = params.get('intervencaoId');
 
   // Se não veio de Resolver, limpar qualquer sessão anterior
-  if (!novoIdInicial) {
+  if (!novoIdInicial && localStorage.getItem('cron_paus') !== 'false') {
     localStorage.removeItem('cron_id');
     localStorage.removeItem('cron_ini');
     localStorage.removeItem('cron_acum');
     localStorage.removeItem('cron_paus');
     localStorage.removeItem('cron_hora');
   }
-
   if (novoIdInicial && localStorage.getItem("cron_id") !== novoIdInicial) {
     const agora = Date.now();
     const hi = toHHMM(agora);
