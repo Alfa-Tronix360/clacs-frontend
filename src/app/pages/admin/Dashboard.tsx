@@ -197,7 +197,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{tecnico.nome}</p>
-                    <p className="text-sm text-gray-600">{tecnico.horasMes || 0}h trabalhadas</p>
+                    <p className="text-sm text-gray-600">{(tecnico.horasMes || 0).toFixed(2)}h trabalhadas</p>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center gap-1 text-yellow-600">
