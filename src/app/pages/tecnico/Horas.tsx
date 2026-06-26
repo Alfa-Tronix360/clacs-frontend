@@ -29,7 +29,7 @@ export default function TecnicoHoras() {
   const novoIdInicial = params.get('intervencaoId');
 
   // Se não veio de Resolver, limpar qualquer sessão anterior
-  if (!novoIdInicial && localStorage.getItem('cron_paus') !== 'false') {
+  if (!novoIdInicial && !localStorage.getItem('cron_id')) {
     localStorage.removeItem('cron_id');
     localStorage.removeItem('cron_ini');
     localStorage.removeItem('cron_acum');
@@ -278,7 +278,7 @@ export default function TecnicoHoras() {
               {cronAtivo && <span className="ml-2 text-xs text-gray-400">(pause para preencher)</span>}
             </label>
             <textarea value={descricao} onChange={e => setDescricao(e.target.value)}
-              placeholder={cronAtivo ? "⏸ Pause o cronómetro para escrever..." : "Descreva o que foi feito para resolver o problema..."}
+              placeholder={cronAtivo ? "Pause o cronómetro para escrever..." : "Descreva o que foi feito para resolver o problema..."}
               rows={4} disabled={cronAtivo}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors ${cronAtivo
                 ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
@@ -295,7 +295,7 @@ export default function TecnicoHoras() {
                 Iniciado às <span className="font-semibold">{horaLabel}</span>
                 {cronAtivo
                   ? <span className="ml-2 text-green-600 font-medium">● A contar</span>
-                  : <span className="ml-2 text-yellow-600 font-medium">⏸ Pausado</span>}
+                  : <span className="ml-2 text-yellow-600 font-medium"> Pausado</span>}
               </p>
             ) : (
               <p className="text-sm text-gray-400 mb-4">Pronto para iniciar</p>
