@@ -142,7 +142,9 @@ export default function ClienteContratos() {
               : 0;
             const horasRestantes = horasContratadas - horasUsadas;
 
-            const intervencoesDoContrato = intervencoes.filter(i => i.cliente_id === clienteId);
+            const intervencoesDoContrato = intervencoes.filter(i =>
+              i.cliente_id === clienteId || i.clienteId === clienteId
+            );
 
             return (
               <div key={contrato.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
