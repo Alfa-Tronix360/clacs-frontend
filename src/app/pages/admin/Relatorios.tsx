@@ -2,6 +2,10 @@ import { Download, BarChart3, PieChart, TrendingUp, Loader } from "lucide-react"
 import { useState, useEffect } from "react";
 import { clientesAPI, contratosAPI, intervencoesAPI, registrosHorasAPI } from "../../services/api";
 
+const API_BASE_URL = window.location.hostname === "localhost"
+  ? "http://localhost:8001"
+  : "https://clacs-backend.onrender.com";
+
 export default function AdminRelatorios() {
   const [clientes, setClientes] = useState<any[]>([]);
   const [contratos, setContratos] = useState<any[]>([]);
@@ -81,7 +85,9 @@ export default function AdminRelatorios() {
           <h1 className="text-3xl font-bold text-gray-900">Relatórios e Análises</h1>
           <p className="text-gray-600 mt-1">Visualize métricas e indicadores de desempenho</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+        <button
+          onClick={() => window.open(`${API_BASE_URL}/relatorios/geral`, '_blank')}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
           <Download className="w-5 h-5" />
           Exportar Relatório
         </button>
@@ -151,7 +157,7 @@ export default function AdminRelatorios() {
             {Object.entries(intervencoesPorStatus).map(([status, count]) => {
               const total = totalIntervencoes || 1;
               const percentual = (count / total) * 100;
-              
+
               return (
                 <div key={status}>
                   <div className="flex items-center justify-between mb-1">
@@ -159,13 +165,12 @@ export default function AdminRelatorios() {
                     <span className="text-sm font-semibold text-gray-900">{count}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${
-                        status === "Concluído" ? "bg-green-500" :
+                    <div
+                      className={`h-2 rounded-full ${status === "Concluído" ? "bg-green-500" :
                         status === "Em Andamento" ? "bg-blue-500" :
-                        status === "Aguardando Cliente" ? "bg-yellow-500" :
-                        "bg-gray-500"
-                      }`}
+                          status === "Aguardando Cliente" ? "bg-yellow-500" :
+                            "bg-gray-500"
+                        }`}
                       style={{ width: `${percentual}%` }}
                     ></div>
                   </div>
@@ -184,7 +189,7 @@ export default function AdminRelatorios() {
             {Object.entries(intervencoesPorPrioridade).map(([prioridade, count]) => {
               const total = totalIntervencoes || 1;
               const percentual = (count / total) * 100;
-              
+
               return (
                 <div key={prioridade}>
                   <div className="flex items-center justify-between mb-1">
@@ -192,12 +197,11 @@ export default function AdminRelatorios() {
                     <span className="text-sm font-semibold text-gray-900">{count}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${
-                        prioridade === "Alta" ? "bg-red-500" :
+                    <div
+                      className={`h-2 rounded-full ${prioridade === "Alta" ? "bg-red-500" :
                         prioridade === "Média" ? "bg-yellow-500" :
-                        "bg-green-500"
-                      }`}
+                          "bg-green-500"
+                        }`}
                       style={{ width: `${percentual}%` }}
                     ></div>
                   </div>
